@@ -3,6 +3,7 @@ extern crate kl_http;
 
 use kl_http::{HttpSerialise, MyHttp};
 use std::io::Read;
+use std::io::BufReader;
 
 fn main() {
 	use std::io::Write;
@@ -20,6 +21,7 @@ fn main() {
 
 			let mut response = http::Response::builder();
 			response.status(http::StatusCode::OK);
+			// response.header("content-length", 7.to_string().as_bytes());
 			let response = response
 				.body("hello me".as_bytes().to_vec())
 				.expect("Couldn't add body");
@@ -30,11 +32,14 @@ fn main() {
 
 	let mut s = ::std::net::TcpStream::connect("127.0.0.1:8080").unwrap();
 
-	s.write(incoming_request);
+	s.write(incoming_request).unwrap();
 
-	let mut string = String::new();
-	s.read_to_string(&mut string);
-	println!("{}", string);
+	let response = {
+		let mut reader = BufReader::new(&mut s);
+		kl_http::parse_into_response(&mut reader)
+	};
+
+	println!("{}", String::from_utf8_lossy(&response.to_http()));
 
 	listening_thread.join().expect("Thread joining failed.");
 }

@@ -2,6 +2,8 @@
 name = "kl-http"
 version = "0.1.0"
 authors = ["kurtlawrence <kurtlawrence92@gmail.com>"]
+description = "Helper crate for getting TcpStream into a http Request."
+license = "MIT"
 
 [dependencies]
 http = "*"

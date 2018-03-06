@@ -5,8 +5,7 @@ extern crate http;
 mod tests {
 	#[test]
 	fn main() {
-		use std::io::Write;
-		use std::io::Read;
+		use std::io::{BufReader, Write};
 		use MyHttp;
 		use HttpSerialise;
 		use http::{Request, Response, StatusCode};
@@ -38,6 +37,20 @@ mod tests {
 		let mut s = ::std::net::TcpStream::connect("127.0.0.1:8080").unwrap();
 
 		s.write(incoming_request).unwrap();
+
+		let response = {
+			let mut reader = BufReader::new(&mut s);
+			::parse_into_response(&mut reader)
+		};
+
+		assert_eq!(
+			response.body(),
+			&"hello me"
+				.as_bytes()
+				.iter()
+				.map(|x| *x)
+				.collect::<Vec<u8>>()
+		);
 
 		//listening_thread.join().expect("Thread joining failed.");
 	}
