@@ -1,0 +1,8 @@
+[package]
+name = "kl-http"
+version = "0.1.0"
+authors = ["kurtlawrence <kurtlawrence92@gmail.com>"]
+
+[dependencies]
+http = "*"
+httparse = "*"
