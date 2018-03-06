@@ -6,5 +6,5 @@ description = "Helper crate for getting TcpStream into a http Request."
 license = "MIT"
 
 [dependencies]
-http = "*"
-httparse = "*"
+http = "0.1.5"
+httparse = "1.2.4"
