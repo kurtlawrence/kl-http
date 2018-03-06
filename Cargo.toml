@@ -4,6 +4,10 @@ version = "0.1.0"
 authors = ["kurtlawrence <kurtlawrence92@gmail.com>"]
 description = "Helper crate for getting TcpStream into a http Request."
 license = "MIT"
+readme = "README.md"
+keywords = ["http", "tcp", "net", "network"]
+categories = ["network-programming", "web-programming", "web-programming::http-client" , "web-programming::http-server", "web-programming::websocket"]
+
 
 [dependencies]
 http = "0.1.5"

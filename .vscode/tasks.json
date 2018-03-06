@@ -1,0 +1,125 @@
+{
+	// See https://go.microsoft.com/fwlink/?LinkId=733558
+	// for the documentation about the tasks.json format
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "shell",
+			"label": "cargo doc open",
+			"command": "cargo doc --no-deps --open",
+			"args": [
+				""
+			],
+			"problemMatcher": [
+				"$rustc"
+			]
+		},
+		// TESTING
+		{
+			"type": "shell",
+			"label": "cargo build tests",
+			"command": "cargo test --no-run",
+			"args": [
+				""
+			],
+			"problemMatcher": [
+				"$rustc"
+			],
+			"group": "build",
+			"presentation": {
+				"reveal": "always",
+				"panel": "new"
+			}
+		},
+		{
+			"type": "shell",
+			"label": "cargo test all",
+			"command": "cargo test --all",
+			"args": [
+				""
+			],
+			"problemMatcher": [
+				"$rustc"
+			],
+			"group": "build",
+			"presentation": {
+				"reveal": "always",
+				"panel": "new"
+			}
+		},
+		// BUILDING
+		{
+			"type": "shell",
+			"label": "cargo build",
+			"command": "cargo build",
+			"args": [
+				""
+			],
+			"problemMatcher": [
+				"$rustc"
+			],
+			"group": "build",
+			"presentation": {
+				"reveal": "always",
+				"panel": "new"
+			}
+		},
+		{
+			"type": "shell",
+			"label": "cargo build no warnings",
+			"command": "cargo rustc --lib -- -Awarnings",
+			"args": [
+				""
+			],
+			"problemMatcher": [
+				"$rustc"
+			],
+			"group": "build",
+			"presentation": {
+				"reveal": "always",
+				"panel": "new"
+			}
+		},
+		{
+			"type": "shell",
+			"label": "cargo bench",
+			"command": "cargo",
+			"args": [
+				"bench"
+			],
+			"problemMatcher": [
+				"$rustc"
+			],
+			"presentation": {
+				"reveal": "always",
+				"panel": "new"
+			}
+		},
+		{
+			"type": "shell",
+			"label": "cargo build release",
+			"command": "cargo build --release",
+			"args": [],
+			"problemMatcher": [
+				"$rustc"
+			],
+			"presentation": {
+				"reveal": "always",
+				"panel": "new"
+			}
+		},
+		{
+			"type": "shell",
+			"label": "cargo run release",
+			"command": "cargo run --release",
+			"args": [],
+			"problemMatcher": [
+				"$rustc"
+			],
+			"presentation": {
+				"reveal": "always",
+				"panel": "new"
+			},
+		},
+	]
+}
