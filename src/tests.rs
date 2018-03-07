@@ -5,7 +5,7 @@ extern crate http;
 #[test]
 fn main() {
 	use std::io::{BufReader, Write};
-	use MyHttp;
+	use HttpRequest;
 	use HttpSerialise;
 	use http::{Request, Response, StatusCode};
 
@@ -16,7 +16,8 @@ fn main() {
 			::std::net::TcpListener::bind("127.0.0.1:8080").expect("Failed listening connection.");
 
 		for stream in listener.incoming() {
-			let mut myhttp = MyHttp::from_tcp_stream(stream.expect("Failed to return stream."));
+			let mut myhttp =
+				HttpRequest::from_tcp_stream(stream.expect("Failed to return stream.")).unwrap();
 
 			assert_eq!(
 				myhttp.request.to_http(),
@@ -40,7 +41,7 @@ fn main() {
 	let response = {
 		let mut reader = BufReader::new(&mut s);
 		::parse_into_response(&mut reader)
-	};
+	}.unwrap();
 
 	assert_eq!(
 		response.body(),
