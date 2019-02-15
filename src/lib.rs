@@ -1,68 +1,47 @@
 //! # kl-http
 //!
+//! [![Build Status](https://travis-ci.com/kurtlawrence/kl-http.svg?branch=master)](https://travis-ci.com/kurtlawrence/kl-http) [![Latest Version](https://img.shields.io/crates/v/kl-http.svg)](https://crates.io/crates/kl-http) [![Rust Documentation](https://img.shields.io/badge/api-rustdoc-blue.svg)](https://docs.rs/kl-http) [![codecov](https://codecov.io/gh/kurtlawrence/kl-http/branch/master/graph/badge.svg)](https://codecov.io/gh/kurtlawrence/kl-http)
+//!
 //! A lightweight converter for taking a `TcpStream` and converting into a `http::Request` or `http::Response`.
 //!
 //! While crates such as `tokio` or `hyper` offer great functionality and features, there is extra work in handling `Futures` and parsing into a workable HTTP request or response. This crate is focused on a simple, easy-to-use conversion of a `TcpStream` into a HTTP request. It uses `http` crate to construct the `http::Request` and `http::Response`. It uses a standard `Vec<u8>` as the body of the requests/response.
 //!
 //! ---
+//!
 //! ## Example
-//! ```rust
+//!
+//! ```ignore
 //! extern crate http;
 //! extern crate kl_http;
 //!
 //! use kl_http::{HttpRequest, HttpSerialise};
 //! use std::io::BufReader;
+//! use std::io::Write;
 //!
-//! fn main() {
-//! 	use std::io::Write;
+//! let incoming_request = b"GET / HTTP/1.1\r\nuser-agent: Dart/2.0 (dart:io)\r\ncontent-type: text/plain; charset=utf-8\r\naccept-encoding: gzip\r\ncontent-length: 11\r\nhost: 10.0.2.2:8080\r\n\r\nHello world";
 //!
-//! 	let incoming_request = b"GET / HTTP/1.1\r\nuser-agent: Dart/2.0 (dart:io)\r\ncontent-type: text/plain; charset=utf-8\r\naccept-encoding: gzip\r\ncontent-length: 11\r\nhost: 10.0.2.2:8080\r\n\r\nHello world";
+//! let listener = ::std::net::TcpListener::bind("127.0.0.1:8080").unwrap();
+//! let mut http_request = HttpRequest::from_tcp_stream(listener.accept().unwrap().0).unwrap();
 //!
-//! 	let listening_thread = ::std::thread::spawn(move || {
-//! 		let listener = ::std::net::TcpListener::bind("127.0.0.1:8080").unwrap();
+//! println!("{}", String::from_utf8_lossy(&http_request.request.to_http()));
 //!
-//! 		for stream in listener.incoming() {
-//! 			let mut http_request = HttpRequest::from_tcp_stream(stream.unwrap()).unwrap();
-//!
-//! 			println!(
-//! 				"{}",
-//! 				String::from_utf8_lossy(&http_request.request.to_http())
-//! 			);
-//!
-//! 			let mut response = http::Response::builder();
-//! 			response.status(http::StatusCode::OK);
-//! 			let response = response.body("hello me".as_bytes().to_vec()).unwrap();
-//!
-//! 			http_request.respond(response).unwrap();
-//! 		}
-//! 	});
-//!
-//! 	let mut s = ::std::net::TcpStream::connect("127.0.0.1:8080").unwrap();
-//!
-//! 	s.write(incoming_request).unwrap();
-//!
-//! 	let response = {
-//! 		let mut reader = BufReader::new(&mut s);
-//! 		kl_http::parse_into_response(&mut reader)
-//! 	};
-//!
-//! 	println!("{}", String::from_utf8_lossy(&response.unwrap().to_http()));
-//!
-//! 	listening_thread.join().expect("Thread joining failed.");
-//! }
+//! let mut response = http::Response::builder();
+//! response.status(http::StatusCode::OK);
+//! let response = response.body("hello me".as_bytes().to_vec()).unwrap();
+//! http_request.respond(response).unwrap();
 //! ```
-
 extern crate http;
 extern crate httparse;
 
 #[cfg(test)]
-
 mod tests;
 
-use std::net::TcpStream;
-use std::io::{BufRead, BufReader, Write};
 use std::error::Error;
 use std::fmt::{Display, Formatter};
+use std::io::{BufRead, BufReader, Write};
+use std::net::TcpStream;
+
+pub use http::Response;
 
 /// Represents a HTTP request.
 ///
@@ -77,7 +56,7 @@ impl HttpRequest {
 	/// Creates new `HttpRequest` from the incoming stream, taking ownership of the `TcpStream` in the process.
 	///
 	/// # Example
-	/// ``` ignore
+	/// ```ignore
 	/// let mut stream = ::std::net::TcpStream::connect("127.0.0.1:8080").unwrap();
 	///
 	/// let http_request = kl_http::HttpRequest::from_tcp_stream(stream);
@@ -102,10 +81,7 @@ impl HttpRequest {
 	/// If the `http::Response` does not contain a header `"content-length"`, a header will be added using the Body(`Vec<u8>`) length.
 	///
 	/// # Example
-	/// ``` ignore
-	/// extern crate http;
-	/// extern crate kl_http;
-	///
+	/// ```ignore
 	/// let mut stream = ::std::net::TcpStream::connect("127.0.0.1:8080").unwrap();
 	/// let mut http_request = kl_http::HttpRequest::from_tcp_stream(stream).unwrap();
 	///
@@ -281,8 +257,11 @@ impl HttpSerialise for http::Request<Vec<u8>> {
 	/// Serialise a `http::Request<Vec<u8>>` into a HTTP request.
 	///
 	/// # Example
-	/// ``` ignore
+	/// ```rust
 	/// extern crate http;
+	/// extern crate kl_http;
+	///
+	/// use kl_http::HttpSerialise;
 	///
 	/// let mut request = http::Request::builder();
 	///	request.method(http::Method::GET);
@@ -338,8 +317,11 @@ impl HttpSerialise for http::Response<Vec<u8>> {
 	/// Serialise a `http::Response<Vec<u8>>` into a HTTP response.
 	///
 	/// # Example
-	/// ``` ignore
+	/// ```rust
 	/// extern crate http;
+	/// extern crate kl_http;
+	///
+	/// use kl_http::HttpSerialise;
 	///
 	/// let mut response = http::Response::builder();
 	/// response.status(http::StatusCode::OK);
